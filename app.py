@@ -18,8 +18,8 @@ def main():
         entries = cur.fetchall()
         entries = [[x[0], x[1]] for x in entries]
         messages = {"messages": entries}
-        # return json.jsonify(messages)
-        return render_template('index.html')
+        return json.jsonify(messages)
+        # return render_template('index.html')
 
 
 @app.route('/showsignup')
