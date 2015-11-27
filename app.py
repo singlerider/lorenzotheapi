@@ -1,8 +1,10 @@
 #!/usr/bin/env python2.7
 
 from flask import Flask, render_template, request, json
+from flask.ext.cors import CORS
 from connection import get_connection
 app = Flask(__name__)
+cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 
 @app.route("/curvyllama")
