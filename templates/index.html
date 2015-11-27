@@ -2,39 +2,112 @@
 <html lang="en">
 
 <head>
-    <title>Curvyllama</title>
+  <title>Curvyllama</title>
 
 
-    <link href="http://getbootstrap.com/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="http://getbootstrap.com/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <link href="http://getbootstrap.com/examples/jumbotron-narrow/jumbotron-narrow.css" rel="stylesheet">
+  <link href="http://getbootstrap.com/examples/jumbotron-narrow/jumbotron-narrow.css" rel="stylesheet">
 
 
 </head>
 
 <body>
 
-        <div class="jumbotron">
-            <h1>Curvyllama</h1>
-            <p class="lead"></p>
-        </div>
-        <div align="center">
-          <span>
-            <iframe src="http://player.twitch.tv/?channel=curvyllama" frameborder="0" scrolling="no" height="431" width="705"></iframe>
-          </span><br />
-          <span>
-            <iframe src="http://www.twitch.tv/curvyllama/chat?popout=" frameborder="0" scrolling="no" height="500" width="350"></iframe>
-          </span>
-          <span>
-            <iframe src="http://www.twitch.tv/lorenzotherobot/chat?popout=" frameborder="0" scrolling="no" height="500" width="350"></iframe>
-          </span>
-        </div>
+  <div class="jumbotron">
+    <h1>Curvyllama</h1>
+    <p class="lead"></p>
+  </div>
+  <div align="center">
+    <span>
+      <iframe src="http://player.twitch.tv/?channel=curvyllama" frameborder="0" scrolling="no" height="431" width="705"></iframe>
+    </span>
+    <br />
+    <span>
+      <iframe src="http://www.twitch.tv/curvyllama/chat?popout=" frameborder="0" scrolling="no" height="500" width="350"></iframe>
+    </span>
+    <span>
+      <iframe src="http://www.twitch.tv/lorenzotherobot/chat?popout=" frameborder="0" scrolling="no" height="500" width="350"></iframe>
+    </span>
+  </div>
 
-        <footer class="footer">
-            <p>&copy; Company 2015</p>
-        </footer>
-
+  <div class="container">
+    <!-- Search Row -->
+    <div class="row">
+      <!-- Username Input -->
+      <div class="col-xs-12 col-md-8">
+        <input id="chatSearchUsername" type="text" name="username" class="form-control" placeholder="Username">
+      </div>
+      <!-- Submit Button -->
+      <div class="col-xs-12 col-md-4">
+        <button id="chatSearchSubmit" type="button" class="btn btn-primary" name="button">Submit</button>
+      </div>
     </div>
+    <!-- Messages Row -->
+    <div class="row">
+      <div class="col-xs-12">
+        <ul class="list-group" id="messageList">
+
+        </ul>
+      </div>
+    </div>
+
+  </div>
+
+  <footer class="footer">
+    <p>&copy; Shane.GG 2015</p>
+  </footer>
+
+  </div>
+  <script src="https://code.jquery.com/jquery-2.1.4.min.js" charset="utf-8"></script>
+  <script type="text/javascript">
+    (function() {
+
+      function getUsername() {
+        var tempUser = $('#chatSearchUsername').val();
+        return tempUser || null;
+      }
+
+      function clickUsernameButton() {
+        console.log('Inside username click');
+        var username = getUsername();
+
+        if (username) {
+          getAPIRes(username);
+        } else{
+          console.error('Username is not available', username);
+        }
+      }
+
+      function getAPIRes(username) {
+        console.log('getAPIRes');
+        $.get("http://shane.gg/api/curvyllama?username=" + username, function(data) {
+          clearOldResults();
+          displayData(data);
+        });
+      }
+
+      function clearOldResults(){
+        var messageList = $('#messageList');
+        messageList.empty();
+      }
+
+      function displayData(data) {
+        console.log('DisplayData: ', data);
+        var messageList = $('#messageList');
+        data = data.messages;
+        for (var i = 0; i < data.length; i++) {
+          console.log('DisplayData-AppendChild: ', data[i]);
+          messageList.append('<li class="list-group-item">' + data[i][1] + '<hr/> <i>' + data[i][0] + '</i></li>')
+        }
+      }
+
+      $('#chatSearchSubmit').click(function(){
+        console.log('Clicked Search Button');
+        clickUsernameButton();
+      });
+    })();
+  </script>
 </body>
 
 </html>
