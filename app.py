@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2.7
 
 from flask import Flask, render_template, request, json
 from connection import get_connection
@@ -13,7 +13,7 @@ def main():
     with con:
         cur = con.cursor()
         cur.execute(
-            "SELECT time, message FROM messages WHERE username = %s",
+            "SELECT time, message FROM messages WHERE username = %s ORDER BY time DESC",
             [username])
         entries = cur.fetchall()
         entries = [[x[0], x[1]] for x in entries]
@@ -28,4 +28,4 @@ def showsignup():
     return render_template('signup.html')
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=8080)
