@@ -98,7 +98,7 @@
         data = data.messages;
         for (var i = 0; i < data.length; i++) {
           console.log('DisplayData-AppendChild: ', data[i]);
-          messageList.append('<li class="list-group-item">' + data[i][1] + '<hr/> <i>' + data[i][0] + '</i></li>')
+          messageList.append('<li class="list-group-item"> <i>' + data[i][0] + '</i>' + ': <strong>' + data[i][1] + '</strong></li>')
         }
       }
 
