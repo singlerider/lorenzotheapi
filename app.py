@@ -7,20 +7,22 @@ app = Flask(__name__)
 
 @app.route("/curvyllama")
 def main():
-    #con = get_connection()
-    #username = request.args.get("username")
-    #print username
-    #with con:
-    #    cur = con.cursor()
-    #    cur.execute(
-    #        "SELECT time, message FROM messages WHERE username = %s ORDER BY time DESC",
-    #        [username])
-    #    entries = cur.fetchall()
-    #    entries = [[x[0], x[1]] for x in entries]
-    #    messages = {"messages": entries}
-         # return json.jsonify(messages)
     return render_template('index.html')
 
+@app.route("/api/curvyllama")
+def api():
+    con = get_connection()
+    username = request.args.get("username")
+    print username
+    with con:
+        cur = con.cursor()
+        cur.execute(
+            "SELECT time, message FROM messages WHERE username = %s ORDER BY time DESC",
+            [username])
+        entries = cur.fetchall()
+        entries = [[x[0], x[1]] for x in entries]
+        messages = {"messages": entries}
+        return json.jsonify(messages)
 
 @app.route('/showsignup')
 def showsignup():
