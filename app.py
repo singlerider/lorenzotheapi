@@ -2,6 +2,7 @@
 
 from flask import Flask, render_template, request, json, redirect, session, url_for
 from flask.ext.cors import CORS
+from forms.forms import *
 from connection import get_connection
 from requests_oauthlib import OAuth2Session
 from flask.json import jsonify
@@ -15,7 +16,8 @@ cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 @app.route("/curvyllama")
 def main():
-    return render_template('index.html')
+    form = SurveyForm(request.form, csrf_enabled=False)
+    return render_template('index.html', form=form)
 
 @app.route("/api/curvyllama")
 def api():

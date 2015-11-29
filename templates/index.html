@@ -4,6 +4,7 @@
 <head>
   <title>Curvyllama</title>
 
+  <link href="./favicon.ico" rel="shortcut icon" type="image/x-icon" />
 
   <link href="http://getbootstrap.com/dist/css/bootstrap.min.css" rel="stylesheet">
 
@@ -37,10 +38,18 @@
       <div class="col-xs-12 col-md-8">
         <input id="chatSearchUsername" type="text" name="username" class="form-control" placeholder="Username">
       </div>
-      <!-- Submit Button -->
-      <div class="col-xs-12 col-md-4">
-        <button id="chatSearchSubmit" type="button" class="btn btn-primary" name="button">Submit</button>
-      </div>
+    </div>
+    <!--DateTimePickerWidget-->
+    <div class="col-xs-12 col-md-8">
+      <form id="DateTimePickerForm" class="form form-datetime" method="POST" action="" role="form">
+        {{form.datetime_local.label}}
+        {{form.datetime_local.label}}
+        {{form.datetime_local(class_="form-control") | safe}}
+      </form>
+    </div>
+    <!-- Submit Button -->
+    <div class="col-xs-12 col-md-4">
+      <button id="chatSearchSubmit" type="button" class="btn btn-primary" name="button">Submit</button>
     </div>
     <!-- Messages Row -->
     <div class="row">
