@@ -39,6 +39,7 @@ def api_channel_chat(channel):
             })
         """
         {
+          "messageCount": 2,
           "messages": [
             {
               "message": "This is an example chat message response",
@@ -77,6 +78,7 @@ def api_channel_chat_user(channel, username):
             })
         """
         {
+          "messageCount": 2,
           "messages": [
             {
               "message": "This is an example chat message response",
@@ -116,6 +118,7 @@ def api_channel_commands(channel):
             })
         """
         {
+          "commandCount": 2,
           "commands": [
             {
               "command": "!testcommand1",
@@ -206,7 +209,8 @@ def api_pokemon_username(username):
                 "forTrade": 2
               }
             }
-          ]
+          ],
+          "partyCount": 2
         }
         """
         return json.jsonify(party)
@@ -290,4 +294,4 @@ if __name__ == "__main__":
     # This allows us to use a plain HTTP callback
     os.environ['DEBUG'] = "1"
     app.secret_key = os.urandom(24)
-    app.run(debug=True, host='0.0.0.0', port=8080)
+    app.run(host='0.0.0.0', port=8080)
