@@ -212,7 +212,7 @@ def api_pokemon_username(username):
         return json.jsonify(party)
 
 
-@app.route("/api/<string:channel>/chatters")
+@app.route("/api/chatters/<string:channel>")
 def api_channel_chatters(channel):
     url = "https://tmi.twitch.tv/group/user/{0}/chatters".format(channel)
     resp = requests.get(url)
