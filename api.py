@@ -6,15 +6,18 @@ from flask.ext.cors import CORS
 from connection import get_connection
 from requests_oauthlib import OAuth2Session
 from config import *
+import time
 import os
 import datetime
+import requests
+import ast
 
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 app = Flask(__name__)
 cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 
-@app.route("/api/<string:channel>/chat")
+@app.route("/api/chat/<string:channel>")
 def api_channel_chat(channel):
     con = get_connection()
     with con:
@@ -24,7 +27,10 @@ def api_channel_chat(channel):
                 WHERE channel = %s ORDER BY time DESC""",
             [channel])
         entries = cur.fetchall()
-        messages = {"messages": []}
+        messages = {
+            "messageCount": len(entries),
+            "messages": []
+            }
         for entry in range(len(entries)):
             messages["messages"].append({
                 "time": entries[entry][0],
@@ -50,7 +56,7 @@ def api_channel_chat(channel):
         return json.jsonify(messages)
 
 
-@app.route("/api/<string:channel>/chat/<string:username>")
+@app.route("/api/chat/<string:channel>/<string:username>")
 def api_channel_chat_user(channel, username):
     con = get_connection()
     with con:
@@ -60,7 +66,10 @@ def api_channel_chat_user(channel, username):
             AND channel = %s ORDER BY time DESC""",
             [username, channel])
         entries = cur.fetchall()
-        messages = {"messages": []}
+        messages = {
+            "messageCount": len(entries),
+            "messages": []
+            }
         for entry in range(len(entries)):
             messages["messages"].append({
                 "time": entries[entry][0],
@@ -83,7 +92,7 @@ def api_channel_chat_user(channel, username):
         return json.jsonify(messages)
 
 
-@app.route("/api/<string:channel>/commands")
+@app.route("/api/commands/<string:channel>")
 def api_channel_commands(channel):
     con = get_connection()
     with con:
@@ -92,7 +101,10 @@ def api_channel_commands(channel):
             """SELECT command, creator, user_level, time, response, times_used
             FROM custom_commands WHERE channel = %s""", [channel])
         entries = cur.fetchall()
-        commands = {"commands": []}
+        commands = {
+            "commandCount": len(entries),
+            "commands": []
+            }
         for entry in range(len(entries)):
             commands["commands"].append({
                 "command": entries[entry][0],
@@ -138,7 +150,10 @@ def api_pokemon_username(username):
                 FROM userpokemon WHERE username = %s
                 ORDER BY userpokemon.position""", [username])
         entries = cur.fetchall()
-        party = {"party": []}
+        party = {
+            "partyCount": len(entries),
+            "party": []
+            }
         for entry in range(len(entries)):
             party["party"].append({
                 "position": entries[entry][0],
@@ -195,6 +210,34 @@ def api_pokemon_username(username):
         }
         """
         return json.jsonify(party)
+
+
+@app.route("/api/<string:channel>/chatters")
+def api_channel_chatters(channel):
+    url = "https://tmi.twitch.tv/group/user/{0}/chatters".format(channel)
+    resp = requests.get(url)
+    data = ast.literal_eval(resp.content)
+    print type(data)
+    """
+    {
+      "_links": {},
+      "chatter_count": 148,
+      "chatters": {
+        "admins": [],
+        "global_mods": [],
+        "moderators": [
+          "moderatorname1",
+          "moderatorname2"
+        ],
+        "staff": [],
+        "viewers": [
+          "1o1canadian",
+          "agentjesse"
+        ]
+      }
+    }
+    """
+    return json.jsonify(data)
 
 # ################ OAUTH PORTION # TODO: MOVE TO ANOTHER FILE ############### #
 
