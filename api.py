@@ -18,7 +18,7 @@ cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 
 @app.route("/api/chat/<string:channel>")
-def api_channel_chat(channel):
+def api_chat_channel(channel):
     con = get_connection()
     with con:
         cur = con.cursor()
@@ -94,6 +94,43 @@ def api_channel_chat_user(channel, username):
         return json.jsonify(messages)
 
 
+@app.route("/api/points/<string:username>")
+def api_points_user(username):
+    con = get_connection()
+    with con:
+        cur = con.cursor()
+        cur.execute(
+            """SELECT donation_points, time_points, time_in_chat
+                FROM users WHERE username = %s
+            """,
+            [username])
+        entry = cur.fetchone()
+        points = {
+            "points": {}
+        }
+        if entry:
+            points["points"]["donationPoints"] = entry[0]
+            points["points"]["timePoints"] = entry[1]
+            points["points"]["timeInChat"] = entry[2]
+            points["points"]["totalPoints"] = entry[0] + entry[1]
+        else:
+            points["points"]["donationPoints"] = 0
+            points["points"]["timePoints"] = 0
+            points["points"]["timeInChat"] = 0
+            points["points"]["totalPoints"] = 0
+        """
+        {
+          "points": {
+            "donationPoints": 17030,
+            "timeInChat": 390,
+            "timePoints": 78,
+            "totalPoints": 17420
+          }
+        }
+        """
+        return json.jsonify(points)
+
+
 @app.route("/api/commands/<string:channel>")
 def api_channel_commands(channel):
     con = get_connection()
@@ -140,6 +177,79 @@ def api_channel_commands(channel):
         }
         """
         return json.jsonify(commands)
+
+
+@app.route("/api/items")
+def api_items():
+    con = get_connection()
+    with con:
+        cur = con.cursor()
+        cur.execute(
+            """SELECT id, name, value
+                FROM items""")
+        entries = cur.fetchall()
+        items = {
+            "items": []
+            }
+        for entry in range(len(entries)):
+            items["items"].append({
+                "itemId": entries[entry][0],
+                "itemName": entries[entry][1],
+                "itemValue": entries[entry][2]
+            })
+        """
+        {
+          "items": [
+            {
+              "itemId": 0,
+              "itemName": "Nugget",
+              "itemValue": 1000
+            },
+            {
+              "itemId": 1,
+              "itemName": "Fire Stone",
+              "itemValue": 750
+            }
+          ]
+        }
+        """
+        return json.jsonify(items)
+
+
+@app.route("/api/items/<string:username>")
+def api_items_username(username):
+    con = get_connection()
+    with con:
+        cur = con.cursor()
+        cur.execute(
+            """SELECT items.id, items.name, useritems.quantity
+                FROM useritems
+                INNER JOIN items ON items.id = useritems.item_id
+                WHERE username = %s""", [username])
+        entries = cur.fetchall()
+        items = {
+            "itemCount": len(entries),
+            "items": []
+            }
+        for entry in range(len(entries)):
+            items["items"].append({
+                "itemId": entries[entry][0],
+                "itemName": entries[entry][1],
+                "itemQuantity": entries[entry][2]
+            })
+        """
+        {
+          "itemCount": 1,
+          "items": [
+            {
+              "itemId": 2,
+              "itemName": "Water Stone",
+              "itemQuantity": 1
+            }
+          ]
+        }
+        """
+        return json.jsonify(items)
 
 
 @app.route("/api/pokemon/<string:username>")
@@ -294,4 +404,4 @@ if __name__ == "__main__":
     # This allows us to use a plain HTTP callback
     os.environ['DEBUG'] = "1"
     app.secret_key = os.urandom(24)
-    app.run(host='0.0.0.0', port=8080)
+    app.run(threaded=True, host='0.0.0.0', port=8080)
