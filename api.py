@@ -1,4 +1,5 @@
 #!/usr/bin/env python2.7
+#coding=utf8
 
 from flask import (
     Flask, request, json, redirect, session, url_for, abort, jsonify)
@@ -11,6 +12,7 @@ import os
 import datetime
 import requests
 import ast
+
 
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 app = Flask(__name__)
@@ -34,7 +36,7 @@ def api_chat_channel(channel):
         for entry in range(len(entries)):
             messages["messages"].append({
                 "time": entries[entry][0],
-                "message": entries[entry][1],
+                "message": unicode(entries[entry][1], errors='replace'),
                 "author": entries[entry][2]
             })
         """
@@ -74,7 +76,7 @@ def api_channel_chat_user(channel, username):
         for entry in range(len(entries)):
             messages["messages"].append({
                 "time": entries[entry][0],
-                "message": entries[entry][1]
+                "message": unicode(entries[entry][1], errors='replace')
             })
         """
         {
@@ -146,11 +148,11 @@ def api_channel_commands(channel):
             }
         for entry in range(len(entries)):
             commands["commands"].append({
-                "command": entries[entry][0],
+                "command": unicode(entries[entry][0], errors='replace'),
                 "creator": entries[entry][1],
                 "userLevel": entries[entry][2],
                 "time": entries[entry][3],
-                "response": entries[entry][4],
+                "response": unicode(entries[entry][4], errors='replace'),
                 "timesUsed": entries[entry][5]
             })
         """
@@ -271,7 +273,7 @@ def api_pokemon_username(username):
             party["party"].append({
                 "position": entries[entry][0],
                 "level": entries[entry][1],
-                "nickname": entries[entry][2],
+                "nickname": unicode(entries[entry][2], errors='replace'),
                 "pokemonId": entries[entry][3],
                 "caughtBy": entries[entry][4],
                 "trade": {
@@ -405,3 +407,4 @@ if __name__ == "__main__":
     os.environ['DEBUG'] = "1"
     app.secret_key = os.urandom(24)
     app.run(threaded=True, host='0.0.0.0', port=8080)
+
