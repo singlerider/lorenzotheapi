@@ -9,7 +9,7 @@ from requests_oauthlib import OAuth2Session
 from config import *
 import time
 import os
-import datetime
+from datetime import datetime
 import requests
 import ast
 
@@ -21,24 +21,56 @@ cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 @app.route("/api/chat/<string:channel>")
 def api_chat_channel(channel):
+    start = request.args.get("startDate")
+    end = request.args.get("endDate")
     con = get_connection()
     with con:
-        cur = con.cursor()
-        cur.execute(
-            """SELECT time, message, username FROM messages
-                WHERE channel = %s ORDER BY time DESC""",
-            [channel])
-        entries = cur.fetchall()
-        messages = {
-            "messageCount": len(entries),
-            "messages": []
-            }
-        for entry in range(len(entries)):
-            messages["messages"].append({
-                "time": entries[entry][0],
-                "message": unicode(entries[entry][1], errors='replace'),
-                "author": entries[entry][2]
-            })
+        if start is not None and end is not None:
+            try:
+                start_date = datetime.strptime(start, '%Y-%m-%d %H:%M:%S').replace(hour=0, minute=0, second=0)
+                end_date = datetime.strptime(end, '%Y-%m-%d %H:%M:%S').replace(hour=23, minute=59, second=59)
+                cur = con.cursor()
+                cur.execute(
+                    """SELECT time, message, username FROM messages
+                        WHERE channel = %s AND (time BETWEEN %s AND %s)
+                        ORDER BY time DESC""",
+                    [channel, start_date, end_date])
+                entries = cur.fetchall()
+                messages = {
+                    "messageCount": len(entries),
+                    "messages": []
+                    }
+                for entry in range(len(entries)):
+                    messages["messages"].append({
+                        "time": entries[entry][0],
+                        "message": unicode(entries[entry][1], errors='replace'),
+                        "author": entries[entry][2]
+                    })
+                return json.jsonify(messages)
+            except:
+                messages = {
+                    "messageCount": 0,
+                    "messages": []
+                    }
+                return json.jsonify(messages)
+        else:
+            cur = con.cursor()
+            cur.execute(
+                """SELECT time, message, username FROM messages
+                    WHERE channel = %s ORDER BY time DESC""",
+                [channel])
+            entries = cur.fetchall()
+            messages = {
+                "messageCount": len(entries),
+                "messages": []
+                }
+            for entry in range(len(entries)):
+                messages["messages"].append({
+                    "time": entries[entry][0],
+                    "message": unicode(entries[entry][1], errors='replace'),
+                    "author": entries[entry][2]
+                })
+            return json.jsonify(messages)
         """
         {
           "messageCount": 2,
@@ -56,28 +88,59 @@ def api_chat_channel(channel):
           ]
         }
         """
-        return json.jsonify(messages)
+
 
 
 @app.route("/api/chat/<string:channel>/<string:username>")
 def api_channel_chat_user(channel, username):
+    start = request.args.get("startDate")
+    end = request.args.get("endDate")
     con = get_connection()
     with con:
-        cur = con.cursor()
-        cur.execute(
-            """SELECT time, message FROM messages WHERE username = %s
-            AND channel = %s ORDER BY time DESC""",
-            [username, channel])
-        entries = cur.fetchall()
-        messages = {
-            "messageCount": len(entries),
-            "messages": []
-            }
-        for entry in range(len(entries)):
-            messages["messages"].append({
-                "time": entries[entry][0],
-                "message": unicode(entries[entry][1], errors='replace')
-            })
+        if start is not None and end is not None:
+            try:
+                start_date = datetime.strptime(start, '%Y-%m-%d %H:%M:%S').replace(hour=0, minute=0, second=0)
+                end_date = datetime.strptime(end, '%Y-%m-%d %H:%M:%S').replace(hour=23, minute=59, second=59)
+                cur = con.cursor()
+                cur.execute(
+                    """SELECT time, message FROM messages
+                        WHERE channel = %s AND (time BETWEEN %s AND %s)
+                        ORDER BY time DESC""",
+                    [channel, start_date, end_date])
+                entries = cur.fetchall()
+                messages = {
+                    "messageCount": len(entries),
+                    "messages": []
+                    }
+                for entry in range(len(entries)):
+                    messages["messages"].append({
+                        "time": entries[entry][0],
+                        "message": unicode(entries[entry][1], errors='replace')
+                    })
+                return json.jsonify(messages)
+            except:
+                messages = {
+                    "messageCount": 0,
+                    "messages": []
+                    }
+                return json.jsonify(messages)
+        else:
+            cur = con.cursor()
+            cur.execute(
+                """SELECT time, message FROM messages
+                    WHERE channel = %s ORDER BY time DESC""",
+                [channel])
+            entries = cur.fetchall()
+            messages = {
+                "messageCount": len(entries),
+                "messages": []
+                }
+            for entry in range(len(entries)):
+                messages["messages"].append({
+                    "time": entries[entry][0],
+                    "message": unicode(entries[entry][1], errors='replace')
+                })
+            return json.jsonify(messages)
         """
         {
           "messageCount": 2,
@@ -93,7 +156,6 @@ def api_channel_chat_user(channel, username):
           ]
         }
         """
-        return json.jsonify(messages)
 
 
 @app.route("/api/points/<string:username>")
@@ -178,7 +240,6 @@ def api_channel_commands(channel):
           ]
         }
         """
-        return json.jsonify(commands)
 
 
 @app.route("/api/items")
@@ -333,7 +394,6 @@ def api_channel_chatters(channel):
     url = "https://tmi.twitch.tv/group/user/{0}/chatters".format(channel)
     resp = requests.get(url)
     data = ast.literal_eval(resp.content)
-    print type(data)
     """
     {
       "_links": {},
@@ -406,5 +466,4 @@ if __name__ == "__main__":
     # This allows us to use a plain HTTP callback
     os.environ['DEBUG'] = "1"
     app.secret_key = os.urandom(24)
-    app.run(threaded=True, host='0.0.0.0', port=8080)
-
+    app.run(debug=True, threaded=True, host='0.0.0.0', port=8080)
