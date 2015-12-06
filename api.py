@@ -104,9 +104,9 @@ def api_channel_chat_user(channel, username):
                 cur = con.cursor()
                 cur.execute(
                     """SELECT time, message FROM messages
-                        WHERE channel = %s AND (time BETWEEN %s AND %s)
+                        WHERE channel = %s AND username = %s AND (time BETWEEN %s AND %s)
                         ORDER BY time DESC""",
-                    [channel, start_date, end_date])
+                    [channel, username, start_date, end_date])
                 entries = cur.fetchall()
                 messages = {
                     "messageCount": len(entries),
@@ -128,8 +128,8 @@ def api_channel_chat_user(channel, username):
             cur = con.cursor()
             cur.execute(
                 """SELECT time, message FROM messages
-                    WHERE channel = %s ORDER BY time DESC""",
-                [channel])
+                    WHERE channel = %s AND username = %s ORDER BY time DESC""",
+                [channel, username])
             entries = cur.fetchall()
             messages = {
                 "messageCount": len(entries),
@@ -466,4 +466,4 @@ if __name__ == "__main__":
     # This allows us to use a plain HTTP callback
     os.environ['DEBUG'] = "1"
     app.secret_key = os.urandom(24)
-    app.run(debug=True, threaded=True, host='0.0.0.0', port=8080)
+    app.run(threaded=True, host='0.0.0.0', port=8080)
