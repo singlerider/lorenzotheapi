@@ -1,5 +1,6 @@
 from flask import json
 
+
 class API:
 
     con = None
@@ -11,8 +12,12 @@ class API:
         with con:
             if start is not None and end is not None:
                 try:
-                    start_date = datetime.strptime(start, '%Y-%m-%d %H:%M:%S').replace(hour=0, minute=0, second=0)
-                    end_date = datetime.strptime(end, '%Y-%m-%d %H:%M:%S').replace(hour=23, minute=59, second=59)
+                    start_date = datetime.strptime(
+                        start, '%Y-%m-%d %H:%M:%S').replace(
+                            hour=0, minute=0, second=0)
+                    end_date = datetime.strptime(
+                        end, '%Y-%m-%d %H:%M:%S').replace(
+                            hour=23, minute=59, second=59)
                     cur = con.cursor()
                     cur.execute(
                         """SELECT time, message, username FROM messages
@@ -27,7 +32,8 @@ class API:
                     for entry in range(len(entries)):
                         messages["messages"].append({
                             "time": entries[entry][0],
-                            "message": unicode(entries[entry][1], errors='replace'),
+                            "message": unicode(
+                                entries[entry][1], errors='replace'),
                             "author": entries[entry][2]
                         })
                     return json.jsonify(messages)
@@ -51,7 +57,8 @@ class API:
                 for entry in range(len(entries)):
                     messages["messages"].append({
                         "time": entries[entry][0],
-                        "message": unicode(entries[entry][1], errors='replace'),
+                        "message": unicode(
+                            entries[entry][1], errors='replace'),
                         "author": entries[entry][2]
                     })
                 return json.jsonify(messages)
@@ -60,12 +67,17 @@ class API:
         with con:
             if start is not None and end is not None:
                 try:
-                    start_date = datetime.strptime(start, '%Y-%m-%d %H:%M:%S').replace(hour=0, minute=0, second=0)
-                    end_date = datetime.strptime(end, '%Y-%m-%d %H:%M:%S').replace(hour=23, minute=59, second=59)
+                    start_date = datetime.strptime(
+                        start, '%Y-%m-%d %H:%M:%S').replace(
+                            hour=0, minute=0, second=0)
+                    end_date = datetime.strptime(
+                        end, '%Y-%m-%d %H:%M:%S').replace(
+                            hour=23, minute=59, second=59)
                     cur = con.cursor()
                     cur.execute(
                         """SELECT time, message FROM messages
-                            WHERE channel = %s AND username = %s AND (time BETWEEN %s AND %s)
+                            WHERE channel = %s AND username = %s
+                            AND (time BETWEEN %s AND %s)
                             ORDER BY time DESC""",
                         [channel, username, start_date, end_date])
                     entries = cur.fetchall()
@@ -76,7 +88,8 @@ class API:
                     for entry in range(len(entries)):
                         messages["messages"].append({
                             "time": entries[entry][0],
-                            "message": unicode(entries[entry][1], errors='replace')
+                            "message": unicode(
+                                entries[entry][1], errors='replace')
                         })
                     return json.jsonify(messages)
                 except:
@@ -89,7 +102,8 @@ class API:
                 cur = con.cursor()
                 cur.execute(
                     """SELECT time, message FROM messages
-                        WHERE channel = %s AND username = %s ORDER BY time DESC""",
+                        WHERE channel = %s AND username = %s
+                        ORDER BY time DESC""",
                     [channel, username])
                 entries = cur.fetchall()
                 messages = {
@@ -193,8 +207,8 @@ class API:
             cur = con.cursor()
             cur.execute(
                 """SELECT position, level, nickname, pokemon_id, caught_by,
-                    for_trade, asking_trade, asking_level, for_sale, asking_price
-                    FROM userpokemon WHERE username = %s
+                    for_trade, asking_trade, asking_level, for_sale,
+                    asking_price FROM userpokemon WHERE username = %s
                     ORDER BY userpokemon.position""", [username])
             entries = cur.fetchall()
             party = {

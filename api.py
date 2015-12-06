@@ -217,6 +217,7 @@ def api_channel_chatters(channel):
     url = "https://tmi.twitch.tv/group/user/{0}/chatters".format(channel)
     resp = requests.get(url)
     data = ast.literal_eval(resp.content)
+    return json.jsonify(data)
     """
     {
       "_links": {},
@@ -236,7 +237,6 @@ def api_channel_chatters(channel):
       }
     }
     """
-    return json.jsonify(data)
 
 # ################ OAUTH PORTION # TODO: MOVE TO ANOTHER FILE ############### #
 
