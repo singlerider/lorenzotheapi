@@ -24,21 +24,20 @@ cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 def api_chat_channel(channel):
     start = request.args.get("startDate")
     end = request.args.get("endDate")
-    con = get_connection()
     api = API()
-    messages = api.chat_channel(con, channel, start, end)
+    messages = api.chat_channel(channel, start, end)
     return messages
     """
     {
       "messageCount": 2,
       "messages": [
         {
-          "message": "This is an example chat message response",
+          "message": "This is the most recent message response",
           "time": "Tue, 01 Dec 2015 09:08:46 GMT",
           "author": "exampleusername1"
         },
         {
-          "message": "This is a subsequent message in descending order",
+          "message": "This is a previous message in descending order",
           "time": "Tue, 01 Dec 2015 09:07:55 GMT",
           "author": "exampleusername2"
         }
@@ -51,9 +50,8 @@ def api_chat_channel(channel):
 def api_channel_chat_user(channel, username):
     start = request.args.get("startDate")
     end = request.args.get("endDate")
-    con = get_connection()
     api = API()
-    messages = api.channel_chat_user(con, channel, username, start, end)
+    messages = api.channel_chat_user(channel, username, start, end)
     return messages
     """
     {
@@ -74,9 +72,8 @@ def api_channel_chat_user(channel, username):
 
 @app.route("/api/points/<string:username>")
 def api_points_user(username):
-    con = get_connection()
     api = API()
-    points = api.points_user(con, username)
+    points = api.points_user(username)
     return points
     """
     {
@@ -92,9 +89,8 @@ def api_points_user(username):
 
 @app.route("/api/commands/<string:channel>")
 def api_channel_commands(channel):
-    con = get_connection()
     api = API()
-    commands = api.channel_commands(con, channel)
+    commands = api.channel_commands(channel)
     return commands
     """
     {
@@ -123,9 +119,8 @@ def api_channel_commands(channel):
 
 @app.route("/api/items")
 def api_items():
-    con = get_connection()
     api = API()
-    items = api.items(con)
+    items = api.items()
     return items
     """
     {
@@ -147,9 +142,8 @@ def api_items():
 
 @app.route("/api/items/<string:username>")
 def api_items_username(username):
-    con = get_connection()
     api = API()
-    items = api.items_username(con, username)
+    items = api.items_username(username)
     return items
     """
     {
@@ -167,9 +161,8 @@ def api_items_username(username):
 
 @app.route("/api/pokemon/<string:username>")
 def api_pokemon_username(username):
-    con = get_connection()
     api = API()
-    party = api.pokemon_username(con, username)
+    party = api.pokemon_username(username)
     return party
     """
     {
@@ -289,4 +282,4 @@ if __name__ == "__main__":
     # This allows us to use a plain HTTP callback
     os.environ['DEBUG'] = "1"
     app.secret_key = os.urandom(24)
-    app.run(debug=True, threaded=True, host='0.0.0.0', port=8080)
+    app.run(threaded=True, host='0.0.0.0', port=8080)

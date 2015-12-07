@@ -1,15 +1,14 @@
 from flask import json
+from lib.connection import get_connection
 
 
 class API:
 
-    con = None
-
     def __init__(self):
-        pass
+        self.con = get_connection()
 
-    def chat_channel(self, con, channel, start, end):
-        with con:
+    def chat_channel(self, channel, start, end):
+        with self.con:
             if start is not None and end is not None:
                 try:
                     start_date = datetime.strptime(
@@ -18,7 +17,7 @@ class API:
                     end_date = datetime.strptime(
                         end, '%Y-%m-%d %H:%M:%S').replace(
                             hour=23, minute=59, second=59)
-                    cur = con.cursor()
+                    cur = self.con.cursor()
                     cur.execute(
                         """SELECT time, message, username FROM messages
                             WHERE channel = %s AND (time BETWEEN %s AND %s)
@@ -44,7 +43,7 @@ class API:
                         }
                     return json.jsonify(messages)
             else:
-                cur = con.cursor()
+                cur = self.con.cursor()
                 cur.execute(
                     """SELECT time, message, username FROM messages
                         WHERE channel = %s ORDER BY time DESC""",
@@ -63,8 +62,8 @@ class API:
                     })
                 return json.jsonify(messages)
 
-    def channel_chat_user(self, con, channel, username, start, end):
-        with con:
+    def channel_chat_user(self, channel, username, start, end):
+        with self.con:
             if start is not None and end is not None:
                 try:
                     start_date = datetime.strptime(
@@ -73,7 +72,7 @@ class API:
                     end_date = datetime.strptime(
                         end, '%Y-%m-%d %H:%M:%S').replace(
                             hour=23, minute=59, second=59)
-                    cur = con.cursor()
+                    cur = self.con.cursor()
                     cur.execute(
                         """SELECT time, message FROM messages
                             WHERE channel = %s AND username = %s
@@ -99,7 +98,7 @@ class API:
                         }
                     return json.jsonify(messages)
             else:
-                cur = con.cursor()
+                cur = self.con.cursor()
                 cur.execute(
                     """SELECT time, message FROM messages
                         WHERE channel = %s AND username = %s
@@ -117,9 +116,9 @@ class API:
                     })
                 return json.jsonify(messages)
 
-    def points_user(self, con, username):
-        with con:
-            cur = con.cursor()
+    def points_user(self, username):
+        with self.con:
+            cur = self.con.cursor()
             cur.execute(
                 """SELECT donation_points, time_points, time_in_chat
                     FROM users WHERE username = %s
@@ -141,9 +140,9 @@ class API:
                 points["points"]["totalPoints"] = 0
             return json.jsonify(points)
 
-    def channel_commands(self, con, channel):
-        with con:
-            cur = con.cursor()
+    def channel_commands(self, channel):
+        with self.con:
+            cur = self.con.cursor()
             cur.execute(
                 """SELECT command, creator, user_level, time, response, times_used
                 FROM custom_commands WHERE channel = %s""", [channel])
@@ -163,9 +162,9 @@ class API:
                 })
             return json.jsonify(commands)
 
-    def items(self, con):
-        with con:
-            cur = con.cursor()
+    def items(self):
+        with self.con:
+            cur = self.con.cursor()
             cur.execute(
                 """SELECT id, name, value
                     FROM items""")
@@ -181,9 +180,9 @@ class API:
                 })
             return json.jsonify(items)
 
-    def items_username(self, con, username):
-        with con:
-            cur = con.cursor()
+    def items_username(self, username):
+        with self.con:
+            cur = self.con.cursor()
             cur.execute(
                 """SELECT items.id, items.name, useritems.quantity
                     FROM useritems
@@ -202,9 +201,9 @@ class API:
                 })
             return json.jsonify(items)
 
-    def pokemon_username(self, con, username):
-        with con:
-            cur = con.cursor()
+    def pokemon_username(self, username):
+        with self.con:
+            cur = self.con.cursor()
             cur.execute(
                 """SELECT position, level, nickname, pokemon_id, caught_by,
                     for_trade, asking_trade, asking_level, for_sale,
