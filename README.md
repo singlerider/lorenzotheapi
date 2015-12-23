@@ -39,7 +39,7 @@ virtualenv), run:
 
 Make a copy of the example config file:
 
-`cp src/config/config_example.py src/config/config.py`
+`cp config_example.py config.py`
 
 Go in the config.py file and modify the existing information to reflect your
 current credentials setup for your database.
