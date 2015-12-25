@@ -282,4 +282,4 @@ if __name__ == "__main__":
     # This allows us to use a plain HTTP callback
     os.environ['DEBUG'] = "1"
     app.secret_key = os.urandom(24)
-    app.run(threaded=True, host='0.0.0.0', port=8080)
+    app.run(threaded=True, host='127.0.0.1', port=8080)
