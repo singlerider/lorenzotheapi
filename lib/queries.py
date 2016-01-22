@@ -24,6 +24,7 @@ class API:
                             ORDER BY time DESC""",
                         [channel, start_date, end_date])
                     entries = cur.fetchall()
+                    cur.close()
                     messages = {
                         "messageCount": len(entries),
                         "messages": []
@@ -49,6 +50,7 @@ class API:
                         WHERE channel = %s ORDER BY time DESC""",
                     [channel])
                 entries = cur.fetchall()
+                cur.close()
                 messages = {
                     "messageCount": len(entries),
                     "messages": []
@@ -80,6 +82,7 @@ class API:
                             ORDER BY time DESC""",
                         [channel, username, start_date, end_date])
                     entries = cur.fetchall()
+                    cur.close()
                     messages = {
                         "messageCount": len(entries),
                         "messages": []
@@ -105,6 +108,7 @@ class API:
                         ORDER BY time DESC""",
                     [channel, username])
                 entries = cur.fetchall()
+                cur.close()
                 messages = {
                     "messageCount": len(entries),
                     "messages": []
@@ -125,6 +129,7 @@ class API:
                 """,
                 [username])
             entry = cur.fetchone()
+            cur.close()
             points = {
                 "points": {}
             }
@@ -147,6 +152,7 @@ class API:
                 """SELECT command, creator, user_level, time, response, times_used
                 FROM custom_commands WHERE channel = %s""", [channel])
             entries = cur.fetchall()
+            cur.close()
             commands = {
                 "commandCount": len(entries),
                 "commands": []
@@ -165,10 +171,9 @@ class API:
     def items(self):
         with self.con:
             cur = self.con.cursor()
-            cur.execute(
-                """SELECT id, name, value
-                    FROM items""")
+            cur.execute("""SELECT id, name, value FROM items""")
             entries = cur.fetchall()
+            cur.close()
             items = {
                 "items": []
                 }
@@ -189,6 +194,7 @@ class API:
                     INNER JOIN items ON items.id = useritems.item_id
                     WHERE username = %s""", [username])
             entries = cur.fetchall()
+            cur.close()
             items = {
                 "itemCount": len(entries),
                 "items": []
@@ -210,6 +216,7 @@ class API:
                     asking_price FROM userpokemon WHERE username = %s
                     ORDER BY userpokemon.position""", [username])
             entries = cur.fetchall()
+            cur.close()
             party = {
                 "partyCount": len(entries),
                 "party": []
@@ -232,3 +239,26 @@ class API:
                     }
                 })
             return json.jsonify(party)
+
+    def channel_quotes(self, channel):
+        with self.con:
+            cur = self.con.cursor()
+            cur.execute(
+                """SELECT created_by, quote, quote_number, game
+                FROM quotes WHERE channel = %s""", [channel])
+            entries = cur.fetchall()
+            cur.close()
+            quotes = {
+                "quoteCount": len(entries),
+                "quotes": []
+                }
+            for entry in range(len(entries)):
+                print entries[entry]
+                quotes["quotes"].append({
+                    "createdBy": entries[entry][0],
+                    "quote": unicode(entries[entry][1], errors='replace'),
+                    "quoteNumber": entries[entry][2],
+                    "game": unicode(entries[entry][3], errors='replace')
+                })
+            print entries
+            return json.jsonify(quotes)

@@ -1,19 +1,15 @@
 #!/usr/bin/env python2.7
 #coding=utf8
 
-from flask import (
-    Flask, request, json, redirect, session, url_for, abort, jsonify)
-from flask.ext.cors import CORS
-from requests_oauthlib import OAuth2Session
-from config import *
-from lib.queries import API
-import time
-import os
-from lib.connection import get_connection
-from datetime import datetime
-import requests
 import ast
+import os
+from config import client_id, client_secret, redirect_uri
 
+import requests
+from flask import Flask, json, redirect, request, session
+from flask.ext.cors import CORS
+from lib.queries import API
+from requests_oauthlib import OAuth2Session
 
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 app = Flask(__name__)
@@ -228,6 +224,31 @@ def api_channel_chatters(channel):
           "agentjesse"
         ]
       }
+    }
+    """
+
+
+@app.route("/api/quotes/<string:channel>")
+def api_channel_quotes(channel):
+    api = API()
+    quotes = api.channel_quotes(channel)
+    return quotes
+    """
+    {
+      "quoteCount": 15,
+      "quotes": [
+        {
+          "createdBy": "singlerider",
+          "game": "H1Z1",
+          "quote": "we were just talking about you and your awesome cable management skills",
+          "quoteNumber": 1
+        },
+        {
+          "createdBy": "joecow",
+          "game": "H1Z1",
+          "quote": "JoeCow is the best -Everyone ever 2016",
+          "quoteNumber": 2
+        }
     }
     """
 

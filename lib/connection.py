@@ -1,6 +1,7 @@
-from config import mysql_credentials
-import MySQLdb as mdb
 import sys
+from config import mysql_credentials
+
+import MySQLdb as mdb
 
 
 def get_connection():
