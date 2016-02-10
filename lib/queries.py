@@ -21,7 +21,7 @@ class API:
                     cur.execute(
                         """SELECT time, message, username FROM messages
                             WHERE channel = %s AND (time BETWEEN %s AND %s)
-                            ORDER BY time DESC""",
+                            AND channel != 'WHISPER' ORDER BY time DESC""",
                         [channel, start_date, end_date])
                     entries = cur.fetchall()
                     cur.close()
@@ -47,7 +47,8 @@ class API:
                 cur = self.con.cursor()
                 cur.execute(
                     """SELECT time, message, username FROM messages
-                        WHERE channel = %s ORDER BY time DESC""",
+                        WHERE channel = %s AND channel != 'WHISPER'
+                        ORDER BY time DESC""",
                     [channel])
                 entries = cur.fetchall()
                 cur.close()
@@ -79,7 +80,7 @@ class API:
                         """SELECT time, message FROM messages
                             WHERE channel = %s AND username = %s
                             AND (time BETWEEN %s AND %s)
-                            ORDER BY time DESC""",
+                            AND channel != 'WHISPER' ORDER BY time DESC""",
                         [channel, username, start_date, end_date])
                     entries = cur.fetchall()
                     cur.close()
@@ -105,7 +106,7 @@ class API:
                 cur.execute(
                     """SELECT time, message FROM messages
                         WHERE channel = %s AND username = %s
-                        ORDER BY time DESC""",
+                        AND channel != 'WHISPER' ORDER BY time DESC""",
                     [channel, username])
                 entries = cur.fetchall()
                 cur.close()
