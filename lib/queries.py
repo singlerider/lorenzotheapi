@@ -125,7 +125,7 @@ class API:
         with self.con:
             cur = self.con.cursor()
             cur.execute(
-                """SELECT donation_points, time_points, time_in_chat
+                """SELECT points, time_in_chat
                     FROM users WHERE username = %s
                 """,
                 [username])
@@ -135,15 +135,11 @@ class API:
                 "points": {}
             }
             if entry:
-                points["points"]["donationPoints"] = entry[0]
-                points["points"]["timePoints"] = entry[1]
-                points["points"]["timeInChat"] = entry[2]
-                points["points"]["totalPoints"] = entry[0] + entry[1]
+                points["points"]["totalPoints"] = entry[0]
+                points["points"]["timeInChat"] = entry[1]
             else:
-                points["points"]["donationPoints"] = 0
-                points["points"]["timePoints"] = 0
-                points["points"]["timeInChat"] = 0
-                points["points"]["totalPoints"] = 0
+                 points["points"]["totalPoints"] = 0
+                 points["points"]["timeInChat"] = 0
             return json.jsonify(points)
 
     def channel_commands(self, channel):
