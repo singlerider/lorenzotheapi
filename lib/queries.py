@@ -1,5 +1,6 @@
 from flask import json
 from lib.connection import get_connection
+from datetime import datetime
 
 
 class API:
@@ -21,7 +22,8 @@ class API:
                     cur.execute(
                         """SELECT time, message, username FROM messages
                             WHERE channel = %s AND (time BETWEEN %s AND %s)
-                            AND channel != 'WHISPER' ORDER BY time DESC""",
+                            AND channel != 'WHISPER' ORDER BY time DESC
+                            LIMIT = 10000""",
                         [channel, start_date, end_date])
                     entries = cur.fetchall()
                     cur.close()
@@ -48,7 +50,7 @@ class API:
                 cur.execute(
                     """SELECT time, message, username FROM messages
                         WHERE channel = %s AND channel != 'WHISPER'
-                        ORDER BY time DESC""",
+                        ORDER BY time DESC LIMIT 10000""",
                     [channel])
                 entries = cur.fetchall()
                 cur.close()
@@ -80,7 +82,8 @@ class API:
                         """SELECT time, message FROM messages
                             WHERE channel = %s AND username = %s
                             AND (time BETWEEN %s AND %s)
-                            AND channel != 'WHISPER' ORDER BY time DESC""",
+                            AND channel != 'WHISPER' ORDER BY time DESC
+                            LIMIT 10000""",
                         [channel, username, start_date, end_date])
                     entries = cur.fetchall()
                     cur.close()
@@ -106,7 +109,8 @@ class API:
                 cur.execute(
                     """SELECT time, message FROM messages
                         WHERE channel = %s AND username = %s
-                        AND channel != 'WHISPER' ORDER BY time DESC""",
+                        AND channel != 'WHISPER' ORDER BY time DESC
+                        LIMIT 10000""",
                     [channel, username])
                 entries = cur.fetchall()
                 cur.close()
@@ -250,12 +254,10 @@ class API:
                 "quotes": []
                 }
             for entry in range(len(entries)):
-                print entries[entry]
                 quotes["quotes"].append({
                     "createdBy": entries[entry][0],
                     "quote": unicode(entries[entry][1], errors='replace'),
                     "quoteNumber": entries[entry][2],
                     "game": unicode(entries[entry][3], errors='replace')
                 })
-            print entries
             return json.jsonify(quotes)
