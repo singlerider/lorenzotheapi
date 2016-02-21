@@ -3,7 +3,8 @@
 
 import ast
 import os
-from config import client_id, client_secret, redirect_uri
+from config import (client_id, client_secret, redirect_uri, twitch_client_id,
+    twitch_client_secret, twitch_redirect_uri, twitch_scopes)
 
 import requests
 from flask import Flask, json, redirect, request, session
@@ -265,7 +266,7 @@ scope = ["donations.read", "donations.create"]
 
 
 @app.route("/twitchalerts/authorize")
-def authorize():
+def twitchalerts_authorize():
     """Step 1: User Authorization.
 
     Redirect the user/resource owner to the OAuth provider (i.e. Github)
@@ -281,7 +282,7 @@ def authorize():
 # Step 2: User authorization, this happens on the provider.
 
 @app.route("/twitchalerts/authorized", methods=["GET", "POST"])
-def authorized():
+def twitchalerts_authorized():
     """ Step 3: Retrieving an access token.
 
     The user has been redirected back from the provider to your registered
@@ -298,6 +299,41 @@ def authorized():
         'https://www.twitchalerts.com/api/v1.0/donations', params=params)
     return str(token["access_token"])
 
+
+@app.route("/twitch/authorize")
+def twitch_authorize():
+    """Step 1: User Authorization.
+
+    Redirect the user/resource owner to the OAuth provider (i.e. Github)
+    using an URL with a few key OAuth parameters.
+    """
+    authorization_base_url = "https://api.twitch.tv/kraken/oauth2/authorize" + \
+        "?response_type=code" + \
+        "&client_id=" + twitch_client_id + \
+        "&redirect_uri=" + twitch_redirect_uri
+    scope = twitch_scopes
+    twitch = OAuth2Session(client_id=twitch_client_id, scope=scope, redirect_uri=twitch_redirect_uri)
+    authorization_url, state = twitch.authorization_url(authorization_base_url)
+    # State is used to prevent CSRF, keep this for later.
+    session['oauth_state'] = state
+    return redirect(authorization_url)
+
+
+@app.route("/twitch/authorized", methods=["GET", "POST"])
+def twitch_authorized():
+    """ Step 3: Retrieving an access token.
+
+    The user has been redirected back from the provider to your registered
+    callback URL. With this redirection comes an authorization code included
+    in the redirect URL. We will use that to obtain an access token.
+    """
+    token_url = "https://api.twitch.tv/kraken/oauth2/token"
+    code = request.args.get('code', '')
+    twitch = OAuth2Session(
+        twitch_client_id, redirect_uri=twitch_redirect_uri)  # state=session['oauth_state']
+    token = twitch.fetch_token(
+        token_url, client_secret=twitch_client_secret, code=code)
+    return str(token["access_token"])
 
 if __name__ == "__main__":
     # This allows us to use a plain HTTP callback
