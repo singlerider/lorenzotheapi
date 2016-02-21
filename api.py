@@ -5,7 +5,7 @@ import ast
 import os
 from config import (client_id, client_secret, redirect_uri, twitch_client_id,
     twitch_client_secret, twitch_redirect_uri, twitch_scopes)
-
+import sqlite3 as lite
 import requests
 from flask import Flask, json, redirect, request, session
 from flask.ext.cors import CORS
@@ -256,15 +256,6 @@ def api_channel_quotes(channel):
 # ################ OAUTH PORTION # TODO: MOVE TO ANOTHER FILE ############### #
 
 
-# This information is obtained upon registration of a new GitHub OAuth
-# application here: https://github.com/settings/applications/new
-
-
-authorization_base_url = 'https://www.twitchalerts.com/api/v1.0/authorize'
-token_url = 'https://www.twitchalerts.com/api/v1.0/token'
-scope = ["donations.read", "donations.create"]
-
-
 @app.route("/twitchalerts/authorize")
 def twitchalerts_authorize():
     """Step 1: User Authorization.
@@ -272,7 +263,10 @@ def twitchalerts_authorize():
     Redirect the user/resource owner to the OAuth provider (i.e. Github)
     using an URL with a few key OAuth parameters.
     """
-    twitchalerts = OAuth2Session(client_id, scope=scope, redirect_uri=redirect_uri)
+    authorization_base_url = 'https://www.twitchalerts.com/api/v1.0/authorize'
+    scope = ["donations.read", "donations.create"]
+    twitchalerts = OAuth2Session(
+        client_id, scope=scope, redirect_uri=redirect_uri)
     authorization_url, state = twitchalerts.authorization_url(authorization_base_url)
     # State is used to prevent CSRF, keep this for later.
     session['oauth_state'] = state
@@ -289,6 +283,7 @@ def twitchalerts_authorized():
     callback URL. With this redirection comes an authorization code included
     in the redirect URL. We will use that to obtain an access token.
     """
+    token_url = 'https://www.twitchalerts.com/api/v1.0/token'
     code = request.args.get('code', '')
     twitchalerts = OAuth2Session(
         client_id, redirect_uri=redirect_uri)  # state=session['oauth_state']
@@ -312,7 +307,9 @@ def twitch_authorize():
         "&client_id=" + twitch_client_id + \
         "&redirect_uri=" + twitch_redirect_uri
     scope = twitch_scopes
-    twitch = OAuth2Session(client_id=twitch_client_id, scope=scope, redirect_uri=twitch_redirect_uri)
+    twitch = OAuth2Session(
+        client_id=twitch_client_id, scope=scope,
+        redirect_uri=twitch_redirect_uri)
     authorization_url, state = twitch.authorization_url(authorization_base_url)
     # State is used to prevent CSRF, keep this for later.
     session['oauth_state'] = state
@@ -330,10 +327,31 @@ def twitch_authorized():
     token_url = "https://api.twitch.tv/kraken/oauth2/token"
     code = request.args.get('code', '')
     twitch = OAuth2Session(
-        twitch_client_id, redirect_uri=twitch_redirect_uri)  # state=session['oauth_state']
+        client_id=twitch_client_id, scope=twitch_scopes,
+        redirect_uri=twitch_redirect_uri)
     token = twitch.fetch_token(
         token_url, client_secret=twitch_client_secret, code=code)
-    return str(token["access_token"])
+    username_url = "https://api.twitch.tv/kraken?oauth_token=" + token["access_token"]
+    username_resp = requests.get(url=username_url)
+    username = json.loads(username_resp.content)["token"]["user_name"]
+    con = lite.connect("twitch.db", check_same_thread=False)
+    with con:
+        cur = con.cursor()
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS auth(
+                id INTEGER PRIMARY KEY,
+                channel TEXT UNIQUE, twitch_oauth TEXT, twitchalerts_oauth TEXT,
+                streamtip_oauth TEXT);
+        """)
+        con.commit()
+        cur.execute("""
+            INSERT OR IGNORE INTO auth VALUES (NULL, ?, ?, NULL, NULL);
+        """, [username, token["access_token"]])
+        cur.execute("""
+            UPDATE auth SET twitch_oauth = ? WHERE channel LIKE ?;
+        """, [token["access_token"], username])
+    return str("It worked! Thanks, " + username)
+
 
 if __name__ == "__main__":
     # This allows us to use a plain HTTP callback
