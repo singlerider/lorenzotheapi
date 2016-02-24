@@ -1,10 +1,10 @@
 #!/usr/bin/env python2.7
-#coding=utf8
+# coding=utf8
 
 import ast
 import os
 from config import (client_id, client_secret, redirect_uri, twitch_client_id,
-    twitch_client_secret, twitch_redirect_uri, twitch_scopes)
+                    twitch_client_secret, twitch_redirect_uri, twitch_scopes)
 import sqlite3 as lite
 import requests
 from flask import Flask, json, redirect, request, session
@@ -267,7 +267,8 @@ def twitchalerts_authorize():
     scope = ["donations.read", "donations.create"]
     twitchalerts = OAuth2Session(
         client_id, scope=scope, redirect_uri=redirect_uri)
-    authorization_url, state = twitchalerts.authorization_url(authorization_base_url)
+    authorization_url, state = twitchalerts.authorization_url(
+        authorization_base_url)
     # State is used to prevent CSRF, keep this for later.
     session['oauth_state'] = state
     return redirect(authorization_url)
@@ -331,7 +332,8 @@ def twitch_authorized():
         redirect_uri=twitch_redirect_uri)
     token = twitch.fetch_token(
         token_url, client_secret=twitch_client_secret, code=code)
-    username_url = "https://api.twitch.tv/kraken?oauth_token=" + token["access_token"]
+    username_url = "https://api.twitch.tv/kraken?oauth_token=" + \
+        token["access_token"]
     username_resp = requests.get(url=username_url)
     username = json.loads(username_resp.content)["token"]["user_name"]
     con = lite.connect("twitch.db", check_same_thread=False)
@@ -340,15 +342,15 @@ def twitch_authorized():
         cur.execute("""
             CREATE TABLE IF NOT EXISTS auth(
                 id INTEGER PRIMARY KEY,
-                channel TEXT UNIQUE, twitch_oauth TEXT, twitchalerts_oauth TEXT,
-                streamtip_oauth TEXT);
+                channel TEXT UNIQUE, twitch_oauth TEXT,
+                twitchalerts_oauth TEXT, streamtip_oauth TEXT);
         """)
         con.commit()
         cur.execute("""
             INSERT OR IGNORE INTO auth VALUES (NULL, ?, ?, NULL, NULL);
         """, [username, token["access_token"]])
         cur.execute("""
-            UPDATE auth SET twitch_oauth = ? WHERE channel LIKE ?;
+            UPDATE auth SET twitch_oauth = ? WHERE channel = ?;
         """, [token["access_token"], username])
     return str("It worked! Thanks, " + username)
 
