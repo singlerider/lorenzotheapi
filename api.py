@@ -3,16 +3,18 @@
 
 import ast
 import os
+import sqlite3 as lite
 from config import (client_id, client_secret, redirect_uri, twitch_client_id,
                     twitch_client_secret, twitch_redirect_uri, twitch_scopes)
-import sqlite3 as lite
+
+import MySQLdb as mdb
 import requests
 from flask import Flask, json, redirect, request, session
 from flask.ext.cors import CORS
 from lib.queries import API
 from requests_oauthlib import OAuth2Session
 
-os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 app = Flask(__name__)
 cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 
@@ -352,11 +354,22 @@ def twitch_authorized():
         cur.execute("""
             UPDATE auth SET twitch_oauth = ? WHERE channel = ?;
         """, [token["access_token"], username])
+    try:
+        con = mdb.connect("localhost", "root", "", "twitchcurvyllama")
+        with con:
+            cur = con.cursor()
+            cur.execute("""
+                INSERT INTO auth (channel, twitch_oauth) VALUES (%s, %s)
+                    ON DUPLICATE KEY UPDATE twitch_oauth = %s
+            """, [username, token["access_token"], token["access_token"]])
+            cur.close()
+    except:
+        pass
     return str("It worked! Thanks, " + username)
 
 
 if __name__ == "__main__":
     # This allows us to use a plain HTTP callback
-    os.environ['DEBUG'] = "1"
+    os.environ["DEBUG"] = "1"
     app.secret_key = os.urandom(24)
-    app.run(threaded=True, host='0.0.0.0', port=8080)
+    app.run(threaded=True, host="0.0.0.0", port=8080)
