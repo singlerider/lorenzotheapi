@@ -13,6 +13,7 @@ from flask import Flask, json, redirect, request, session
 from flask.ext.cors import CORS
 from lib.queries import API
 from requests_oauthlib import OAuth2Session
+from emitter import emit_donation, emit_subscription
 
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 app = Flask(__name__)
@@ -367,6 +368,28 @@ def twitch_authorized():
         pass
     return str("It worked! Thanks, " + username)
 
+
+@app.route('/api/donation/')
+def receive_donation():
+    emit_donation({
+        "username": "singlerider",
+        "amount": 45,
+        "currency": "USD",
+        "message": "GREAT JOB!"
+    })
+    return 'Donation!'
+
+
+@app.route('/api/subscription/')
+def receive_subscription():
+    emit_subscription({
+        "username": "singlerider",
+        "months": 5
+    })
+    return 'Subscription!'
+
+if __name__ == '__main__':
+    app.run()
 
 if __name__ == "__main__":
     # This allows us to use a plain HTTP callback
