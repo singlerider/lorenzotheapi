@@ -388,9 +388,6 @@ def receive_subscription():
     })
     return 'Subscription!'
 
-if __name__ == '__main__':
-    app.run()
-
 if __name__ == "__main__":
     # This allows us to use a plain HTTP callback
     os.environ["DEBUG"] = "1"
