@@ -17,10 +17,10 @@ import ast
 
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 app = Flask(__name__)
-cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
+cors = CORS(app, resources={r"/lorenzotherobot/*": {"origins": "*"}})
 
 
-@app.route("/api/chat/<string:channel>")
+@app.route("/lorenzotherobot/chat/<string:channel>")
 def api_chat_channel(channel):
     start = request.args.get("startDate")
     end = request.args.get("endDate")
@@ -46,7 +46,7 @@ def api_chat_channel(channel):
     """
 
 
-@app.route("/api/chat/<string:channel>/<string:username>")
+@app.route("/lorenzotherobot/chat/<string:channel>/<string:username>")
 def api_channel_chat_user(channel, username):
     start = request.args.get("startDate")
     end = request.args.get("endDate")
@@ -70,7 +70,7 @@ def api_channel_chat_user(channel, username):
     """
 
 
-@app.route("/api/points/<string:username>")
+@app.route("/lorenzotherobot/points/<string:username>")
 def api_points_user(username):
     api = API()
     points = api.points_user(username)
@@ -87,7 +87,7 @@ def api_points_user(username):
     """
 
 
-@app.route("/api/commands/<string:channel>")
+@app.route("/lorenzotherobot/commands/<string:channel>")
 def api_channel_commands(channel):
     api = API()
     commands = api.channel_commands(channel)
@@ -117,7 +117,7 @@ def api_channel_commands(channel):
     """
 
 
-@app.route("/api/items")
+@app.route("/lorenzotherobot/items")
 def api_items():
     api = API()
     items = api.items()
@@ -140,7 +140,7 @@ def api_items():
     """
 
 
-@app.route("/api/items/<string:username>")
+@app.route("/lorenzotherobot/items/<string:username>")
 def api_items_username(username):
     api = API()
     items = api.items_username(username)
@@ -159,7 +159,7 @@ def api_items_username(username):
     """
 
 
-@app.route("/api/pokemon/<string:username>")
+@app.route("/lorenzotherobot/pokemon/<string:username>")
 def api_pokemon_username(username):
     api = API()
     party = api.pokemon_username(username)
@@ -205,7 +205,7 @@ def api_pokemon_username(username):
     """
 
 
-@app.route("/api/chatters/<string:channel>")
+@app.route("/lorenzotherobot/chatters/<string:channel>")
 def api_channel_chatters(channel):
     url = "https://tmi.twitch.tv/group/user/{0}/chatters".format(channel)
     resp = requests.get(url)
@@ -234,7 +234,7 @@ def api_channel_chatters(channel):
 # ################ OAUTH PORTION # TODO: MOVE TO ANOTHER FILE ############### #
 
 
-@app.route("/twitchalerts/authorize")
+@app.route("/lorenzotherobot/twitchalerts/authorize")
 def demo():
     """Step 1: User Authorization.
 
@@ -254,7 +254,7 @@ def demo():
 
 # Step 2: User authorization, this happens on the provider.
 
-@app.route("/twitchalerts/authorized", methods=["GET"])
+@app.route("/lorenzotherobot/twitchalerts/authorized", methods=["GET"])
 def callback():
     """ Step 3: Retrieving an access token.
 
@@ -272,7 +272,7 @@ def callback():
     params = {'access_token': token['access_token'], 'limit': 100}
     # Get a user's donations
     d = twitchalerts.get(
-        'https://www.twitchalerts.com/api/v1.0/donations', params=params)
+        'https://www.twitchalerts.com/lorenzotherobot/v1.0/donations', params=params)
     print d.content
     print d
     return str(token["access_token"])
